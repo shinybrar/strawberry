@@ -1,5 +1,6 @@
+from asyncio import create_task, get_event_loop
 from asyncio.futures import Future
-from typing import Callable, Generic, List, TypeVar
+from typing import Awaitable, Callable, Generic, List, TypeVar
 
 
 T = TypeVar("T")
@@ -12,14 +13,17 @@ class Dataloader(Generic[T, K]):
     def __init__(self, load_fn: Callable):
         self.load_fn = load_fn
 
-    # TODO: how can make future generic here?
-    async def load(self, id: K) -> Future:
-        # if we have an entry in our cache, we should return the
-        # promise from there
+        self.loop = get_event_loop()
 
-        # TODO: pass loop?
-        future: Future = Future()
+    def load(self, id: K) -> Awaitable:
+        future = self.loop.create_future()
 
-        self.batch.append(future)
+        async def dispatch():
+            future.set_result("LOL")
+            print("marked as done I guess")
+
+        print("calling soon")
+
+        self.loop.call_soon(create_task, dispatch())
 
         return future

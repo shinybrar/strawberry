@@ -1,22 +1,21 @@
-import asyncio
+from asyncio.events import get_event_loop
+
+import pytest
 
 from strawberry.dataloader import Dataloader
 
 
-def test_dataloaders(mocker):
-    mock_batch_func = mocker.Mock()
+pytestmark = pytest.mark.asyncio
 
-    loader = Dataloader(mock_batch_func)
 
-    async def a():
-        await loader.load("1")
+async def test_example():
+    async def idx(keys):
+        return keys
 
-    async def b():
-        await loader.load("2")
+    loader = Dataloader(load_fn=idx)
 
-    async def run():
-        await asyncio.gather(a(), b())
+    print("awaiting")
+    value = await loader.load(1)
+    print("done awaiting")
 
-    asyncio.run(run())
-
-    mock_batch_func.assert_called_once_with("a")
+    assert value == 1
